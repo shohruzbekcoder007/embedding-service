@@ -1,0 +1,9 @@
+# Optional: local HuggingFace models (e.g. BAAI/bge-m3)
+# pip install -r requirements-local.txt
+#
+# Heavy (torch). Only when:
+#   EMBED_PROVIDER=local
+#   EMBED_MODEL=BAAI/bge-m3
+
+sentence-transformers>=3.0.0,<6.0.0
+langchain-huggingface>=0.1.0,<1.0.0

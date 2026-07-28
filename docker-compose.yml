@@ -1,0 +1,48 @@
+name: embedding-service
+
+services:
+  embedding:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: embedding-service:0.1.0
+    container_name: embedding-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      APP_NAME: ${APP_NAME:-embedding-service}
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8090
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      EMBED_PROVIDER: ${EMBED_PROVIDER:-openai}
+      EMBED_MODEL: ${EMBED_MODEL:-text-embedding-3-small}
+      EMBED_DIM: ${EMBED_DIM:-}
+      EMBED_API_KEY: ${EMBED_API_KEY:-}
+      EMBED_BASE_URL: ${EMBED_BASE_URL:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      EMBED_DEVICE: ${EMBED_DEVICE:-cpu}
+      EMBED_BATCH_MAX: ${EMBED_BATCH_MAX:-64}
+      EMBED_MAX_CHARS: ${EMBED_MAX_CHARS:-8000}
+      API_BEARER_TOKEN: ${API_BEARER_TOKEN:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+    ports:
+      - "${APP_PORT:-8090}:8090"
+    volumes:
+      # HF model cache when using local provider
+      - hf_cache:/home/appuser/.cache/huggingface
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  hf_cache:
+    name: embedding-service-hf-cache
+
+networks:
+  default:
+    name: embedding-service-net

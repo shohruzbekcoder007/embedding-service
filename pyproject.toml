@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68,<83"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "embedding-service"
+version = "0.1.0"
+description = "Standalone text embedding microservice (OpenAI / HuggingFace)"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+license = { text = "MIT" }
+dependencies = [
+  "fastapi>=0.115.0,<1.0.0",
+  "uvicorn[standard]>=0.32.0,<1.0.0",
+  "pydantic>=2.9.0,<3.0.0",
+  "python-dotenv>=1.0.1,<2.0.0",
+  "httpx>=0.28.0,<1.0.0",
+  "langchain-openai>=0.2.0",
+  "langchain-core>=0.3.0",
+]
+
+[project.scripts]
+embedding-service = "app.main:main"
+
+[tool.setuptools]
+packages = ["app"]
