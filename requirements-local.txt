@@ -1,9 +1,25 @@
-# Optional: local HuggingFace models (e.g. BAAI/bge-m3)
-# pip install -r requirements-local.txt
+# Local model stack — sentence-transformers on this machine (e.g. BAAI/bge-m3).
 #
-# Heavy (torch). Only when:
+# Heavy (torch, ~2-3GB installed). Only needed when:
 #   EMBED_PROVIDER=local
 #   EMBED_MODEL=BAAI/bge-m3
+#
+# Docker (the normal path): set WITH_LOCAL_MODELS=true and TORCH_INDEX_URL in
+# .env, then `docker compose build`. Nothing to install by hand.
+#
+# Host install, CPU:
+#   pip install -r requirements-local.txt \
+#     --index-url https://download.pytorch.org/whl/cpu \
+#     --extra-index-url https://pypi.org/simple
+#
+# Host install, NVIDIA (pick the index matching the driver's CUDA version:
+# cu126 / cu128 / cu130 — RTX 50xx / Blackwell needs cu128 or newer):
+#   pip install -r requirements-local.txt \
+#     --index-url https://download.pytorch.org/whl/cu130 \
+#     --extra-index-url https://pypi.org/simple
 
+torch>=2.4.0,<3.0.0
 sentence-transformers>=3.0.0,<6.0.0
-langchain-huggingface>=0.1.0,<1.0.0
+# Must stay on the 1.x line: 0.3.x pins langchain-core<1.0 and would
+# downgrade it, breaking langchain-openai in the same image.
+langchain-huggingface>=1.0.0,<2.0.0

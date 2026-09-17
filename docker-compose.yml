@@ -5,6 +5,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # All three are read from .env — see "Local model (bge-m3)" there.
+        WITH_LOCAL_MODELS: ${WITH_LOCAL_MODELS:-false}
+        TORCH_INDEX_URL: ${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cpu}
+        PRELOAD_MODEL: ${PRELOAD_MODEL:-}
     image: embedding-service:0.1.0
     container_name: embedding-service
     restart: unless-stopped
@@ -22,7 +27,17 @@ services:
       EMBED_BASE_URL: ${EMBED_BASE_URL:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
-      EMBED_DEVICE: ${EMBED_DEVICE:-cpu}
+      # Local model runtime
+      EMBED_DEVICE: ${EMBED_DEVICE:-auto}
+      EMBED_NORMALIZE: ${EMBED_NORMALIZE:-true}
+      EMBED_LOCAL_BATCH_SIZE: ${EMBED_LOCAL_BATCH_SIZE:-8}
+      EMBED_PROBE_DIM: ${EMBED_PROBE_DIM:-true}
+      EMBED_TRUST_REMOTE_CODE: ${EMBED_TRUST_REMOTE_CODE:-false}
+      EMBED_QUERY_PREFIX: ${EMBED_QUERY_PREFIX:-}
+      EMBED_DOCUMENT_PREFIX: ${EMBED_DOCUMENT_PREFIX:-}
+      HF_HOME: /home/appuser/.cache/huggingface
+      HF_HUB_OFFLINE: ${HF_HUB_OFFLINE:-0}
+      HF_TOKEN: ${HF_TOKEN:-}
       EMBED_BATCH_MAX: ${EMBED_BATCH_MAX:-64}
       EMBED_MAX_CHARS: ${EMBED_MAX_CHARS:-8000}
       API_BEARER_TOKEN: ${API_BEARER_TOKEN:-}
@@ -30,14 +45,16 @@ services:
     ports:
       - "${APP_PORT:-8090}:8090"
     volumes:
-      # HF model cache when using local provider
+      # HF model cache when using local provider — keeps the ~2.2GB bge-m3
+      # download across container rebuilds.
       - hf_cache:/home/appuser/.cache/huggingface
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/health"]
       interval: 30s
       timeout: 5s
-      retries: 3
-      start_period: 30s
+      retries: 5
+      # First local-model boot downloads weights; raise this if the model is big.
+      start_period: ${HEALTHCHECK_START_PERIOD:-60s}
 
 volumes:
   hf_cache:

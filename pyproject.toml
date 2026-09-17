@@ -7,7 +7,7 @@ name = "embedding-service"
 version = "0.1.0"
 description = "Standalone text embedding microservice (OpenAI / HuggingFace)"
 readme = "README.md"
-requires-python = ">=3.12,<3.14"
+requires-python = ">=3.12,<3.15"
 license = { text = "MIT" }
 dependencies = [
   "fastapi>=0.115.0,<1.0.0",
@@ -17,6 +17,18 @@ dependencies = [
   "httpx>=0.28.0,<1.0.0",
   "langchain-openai>=0.2.0",
   "langchain-core>=0.3.0",
+]
+
+[project.optional-dependencies]
+# Local models via sentence-transformers (e.g. BAAI/bge-m3).
+# For CUDA wheels install with the matching torch index instead:
+#   pip install -e ".[local]" --index-url https://download.pytorch.org/whl/cu130
+#     --extra-index-url https://pypi.org/simple
+local = [
+  "torch>=2.4.0,<3.0.0",
+  "sentence-transformers>=3.0.0,<6.0.0",
+  # 1.x only: 0.3.x pins langchain-core<1.0 and breaks langchain-openai.
+  "langchain-huggingface>=1.0.0,<2.0.0",
 ]
 
 [project.scripts]

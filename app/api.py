@@ -185,10 +185,7 @@ def create_app() -> FastAPI:
         text = _validate_text(body.text, max_chars)
         svc = get_service()
         try:
-            if body.input_type == "document":
-                vec = svc.embed_documents([text])[0]
-            else:
-                vec = svc.embed_query(text)
+            vec = svc.embed_texts([text], body.input_type)[0]
         except Exception as exc:  # noqa: BLE001
             logger.error("embed failed: %s", exc, exc_info=True)
             raise HTTPException(
@@ -237,10 +234,7 @@ def create_app() -> FastAPI:
 
         svc = get_service()
         try:
-            if body.input_type == "query" and len(cleaned) == 1:
-                vectors = [svc.embed_query(cleaned[0])]
-            else:
-                vectors = svc.embed_documents(cleaned)
+            vectors = svc.embed_texts(cleaned, body.input_type)
         except Exception as exc:  # noqa: BLE001
             logger.error("embed/batch failed: %s", exc, exc_info=True)
             raise HTTPException(

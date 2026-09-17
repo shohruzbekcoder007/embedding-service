@@ -1,0 +1,26 @@
+# GPU override. Use with:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
+#
+# Requires an NVIDIA driver on the host plus the NVIDIA Container Toolkit
+# (Docker Desktop on Windows: WSL2 backend). The image must also be built
+# against CUDA wheels — set in .env:
+#   WITH_LOCAL_MODELS=true
+#   TORCH_INDEX_URL=https://download.pytorch.org/whl/cu130
+#
+# Verify after start: curl -s localhost:8090/ready
+# -> identity.runtime.cuda_available must be true.
+
+services:
+  embedding:
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      EMBED_DEVICE: ${EMBED_DEVICE:-cuda}
+      EMBED_LOCAL_BATCH_SIZE: ${EMBED_LOCAL_BATCH_SIZE:-32}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
